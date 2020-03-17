@@ -10,35 +10,25 @@ import (
 var ErrInvalidString = errors.New("invalid string")
 
 func Unpack(input string) (string, error) {
-	var lastRune rune
-	var needEscape bool
-	var result strings.Builder
+	var prev rune
+	var res strings.Builder
 
-	for _, r := range input {
-		if !needEscape {
-			if r == 0x5c { // backslash
-				needEscape = true
-
-				continue
-			}
-
-			if unicode.IsDigit(r) { // digit (multiplier)
-				if lastRune == 0 {
-					return "", ErrInvalidString
-				}
-
-				multiplier, _ := strconv.Atoi(string(r))
-				result.WriteString(strings.Repeat(string(lastRune), multiplier-1))
-				lastRune = 0
-
-				continue
-			}
+	for _, cur := range input {
+		if unicode.IsLetter(cur) {
+			res.WriteRune(cur)
 		}
 
-		result.WriteRune(r)
-		lastRune = r
-		needEscape = false
+		if unicode.IsDigit(cur) {
+			if unicode.IsDigit(prev) || prev == 0 {
+				return "", ErrInvalidString
+			}
+
+			multiplier, _ := strconv.Atoi(string(cur))
+			res.WriteString(strings.Repeat(string(prev), multiplier-1))
+		}
+
+		prev = cur
 	}
 
-	return result.String(), nil
+	return res.String(), nil
 }
