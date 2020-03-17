@@ -24,7 +24,8 @@ func Unpack(input string) (string, error) {
 			}
 
 			multiplier, _ := strconv.Atoi(string(cur))
-			res.WriteString(strings.Repeat(string(prev), multiplier-1))
+			multiplier--
+			res.WriteString(strings.Repeat(string(prev), multiplier))
 		}
 
 		prev = cur
