@@ -33,6 +33,15 @@ func TestUnpack(t *testing.T) {
 			err:      ErrInvalidString,
 		},
 		{
+			input:    "4aaa5",
+			expected: "",
+			err:      ErrInvalidString,
+		},
+		{
+			input:    "hbc3",
+			expected: "hbccc",
+		},
+		{
 			input:    "",
 			expected: "",
 		},
