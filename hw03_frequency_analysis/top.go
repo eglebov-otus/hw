@@ -19,9 +19,8 @@ func Top10(s string) []string {
 	freqMap := map[string]int{}
 
 	r := regexp.MustCompile(`'?\pL[\pL']*(?:-\pL+)*'?`)
-	matches := r.FindAllString(s, -1)
 
-	for _, m := range matches {
+	for _, m := range r.FindAllString(s, -1) {
 		freqMap[strings.ToLower(m)]++
 	}
 
