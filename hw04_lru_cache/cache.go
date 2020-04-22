@@ -27,7 +27,7 @@ func (c *lruCache) Set(key string, value interface{}) bool {
 
 	element, exists := c.items[key]
 
-	if exists == true {
+	if exists {
 		c.queue.MoveToFront(element)
 		element.Value.(*cacheItem).Value = value
 
@@ -57,7 +57,7 @@ func (c *lruCache) Get(key string) (interface{}, bool) {
 
 	element, exists := c.items[key]
 
-	if exists == true {
+	if exists {
 		c.queue.MoveToFront(element)
 
 		return element.Value.(*cacheItem).Value, true
