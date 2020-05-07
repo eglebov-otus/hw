@@ -25,7 +25,8 @@ func Run(tasks []Task, N int, M int) error {
 	wgErr.Add(1)
 
 	go produce(tasks, taskCh)
-	go errorHandler(wgErr, errCounter, M, errCh, stopCh)
+
+	go handleErrors(wgErr, errCounter, M, errCh, stopCh)
 
 	for i := 0; i < N; i++ {
 		go consume(wgCons, stopCh, taskCh, errCh)
@@ -93,7 +94,7 @@ func consume(wg *sync.WaitGroup, stopCh <-chan struct{}, taskCh <-chan Task, err
 	}
 }
 
-func errorHandler(wg *sync.WaitGroup, errCounter *errCounter, M int, errCh <-chan error, stopCh chan<- struct{}) {
+func handleErrors(wg *sync.WaitGroup, errCounter *errCounter, M int, errCh <-chan error, stopCh chan<- struct{}) {
 	defer wg.Done()
 
 	for err := range errCh {
