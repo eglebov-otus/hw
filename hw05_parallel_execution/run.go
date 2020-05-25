@@ -6,11 +6,16 @@ import (
 )
 
 var ErrErrorsLimitExceeded = errors.New("errors limit exceeded")
+var ErrErrorsInvalidWorkersCount = errors.New("you should use at lease 1 worker")
 
 type Task func() error
 
 // Run starts tasks in N goroutines and stops its work when receiving M errors from tasks
 func Run(tasks []Task, N int, M int) error {
+	if N <= 0 {
+		return ErrErrorsInvalidWorkersCount
+	}
+
 	taskCh := make(chan Task, len(tasks))
 	errCh := make(chan error)
 	stopCh := make(chan struct{}, 1)

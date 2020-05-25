@@ -14,6 +14,34 @@ import (
 func TestRun(t *testing.T) {
 	defer goleak.VerifyNone(t)
 
+	t.Run("using invalid worker count", func(t *testing.T) {
+		tasks := make([]Task, 0, 10)
+
+		for i := 0; i < 10; i++ {
+			tasks = append(tasks, func() error {
+				return nil
+			})
+		}
+
+		result := Run(tasks, 0, 10)
+
+		require.Equal(t, ErrErrorsInvalidWorkersCount, result)
+	})
+
+	t.Run("using invalid max errors", func(t *testing.T) {
+		tasks := make([]Task, 0, 10)
+
+		for i := 0; i < 10; i++ {
+			tasks = append(tasks, func() error {
+				return nil
+			})
+		}
+
+		result := Run(tasks, 1, 0)
+
+		require.Equal(t, ErrErrorsLimitExceeded, result)
+	})
+
 	t.Run("if were errors in first M tasks, than finished not more N+M tasks", func(t *testing.T) {
 		tasksCount := 50
 		tasks := make([]Task, 0, tasksCount)
