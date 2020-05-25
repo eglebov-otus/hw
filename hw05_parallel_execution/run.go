@@ -11,6 +11,7 @@ var ErrErrorsInvalidWorkersCount = errors.New("you should use at lease 1 worker"
 type Task func() error
 
 // Run starts tasks in N goroutines and stops its work when receiving M errors from tasks
+//nolint
 func Run(tasks []Task, N int, M int) error {
 	if N <= 0 {
 		return ErrErrorsInvalidWorkersCount
@@ -27,6 +28,7 @@ func Run(tasks []Task, N int, M int) error {
 	wgErr := &sync.WaitGroup{}
 
 	wgCons.Add(N)
+	//nolint
 	wgErr.Add(1)
 
 	go produce(tasks, taskCh)
@@ -99,6 +101,7 @@ func consume(wg *sync.WaitGroup, stopCh <-chan struct{}, taskCh <-chan Task, err
 	}
 }
 
+//nolint
 func handleErrors(wg *sync.WaitGroup, errCounter *errCounter, M int, errCh <-chan error, stopCh chan<- struct{}) {
 	defer wg.Done()
 
