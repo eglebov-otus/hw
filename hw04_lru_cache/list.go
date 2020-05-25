@@ -20,15 +20,15 @@ type list struct {
 	head, tail *listItem
 }
 
-func (l *list) Len() int {
+func (l list) Len() int {
 	return l.len
 }
 
-func (l *list) Front() *listItem {
+func (l list) Front() *listItem {
 	return l.head
 }
 
-func (l *list) Back() *listItem {
+func (l list) Back() *listItem {
 	return l.tail
 }
 

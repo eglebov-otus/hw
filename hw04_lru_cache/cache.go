@@ -4,24 +4,24 @@ import "sync"
 type Key string
 
 type Cache interface {
-	Set(key string, value interface{}) bool
-	Get(key string) (interface{}, bool)
+	Set(key Key, value interface{}) bool
+	Get(key Key) (interface{}, bool)
 	Clear()
 }
 
 type lruCache struct {
 	capacity int
 	queue    List
-	items    map[string]*listItem
+	items    map[Key]*listItem
 	mux      sync.Mutex
 }
 
 type cacheItem struct {
-	Key   string
+	Key   Key
 	Value interface{}
 }
 
-func (c *lruCache) Set(key string, value interface{}) bool {
+func (c *lruCache) Set(key Key, value interface{}) bool {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
@@ -51,7 +51,7 @@ func (c *lruCache) Set(key string, value interface{}) bool {
 	return false
 }
 
-func (c *lruCache) Get(key string) (interface{}, bool) {
+func (c *lruCache) Get(key Key) (interface{}, bool) {
 	c.mux.Lock()
 	defer c.mux.Unlock()
 
@@ -67,15 +67,17 @@ func (c *lruCache) Get(key string) (interface{}, bool) {
 }
 
 func (c *lruCache) Clear() {
-	c.capacity = 0
-	c.items = make(map[string]*listItem)
+	c.mux.Lock()
+	defer c.mux.Unlock()
+
+	c.items = make(map[Key]*listItem)
 	c.queue = NewList()
 }
 
 func NewCache(capacity int) Cache {
 	return &lruCache{
 		capacity: capacity,
-		items:    make(map[string]*listItem),
+		items:    make(map[Key]*listItem),
 		queue:    NewList(),
 	}
 }
