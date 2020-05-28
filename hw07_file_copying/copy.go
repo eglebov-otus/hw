@@ -2,9 +2,9 @@ package main
 
 import (
 	"errors"
+	"github.com/cheggaaa/pb/v3"
 	"io"
 	"os"
-	//"github.com/cheggaaa/pb/v3"
 )
 
 var (
@@ -19,18 +19,10 @@ func Copy(fromPath string, toPath string, offset, limit int64) error {
 		panic(err)
 	}
 
-	info, err := os.Stat(fromPath)
+	n, err := calcBytesToCopy(fromPath, offset, limit)
 
 	if err != nil {
-		panic(err)
-	}
-
-	if 0 == info.Size() {
-		return ErrUnsupportedFile
-	}
-
-	if offset > info.Size() {
-		return ErrOffsetExceedsFileSize
+		return err
 	}
 
 	dst, err := os.Create(toPath)
@@ -45,19 +37,40 @@ func Copy(fromPath string, toPath string, offset, limit int64) error {
 		panic(err)
 	}
 
-	if limit > 0 {
-		_, err = io.CopyN(dst, src, limit)
+	bar := pb.Full.Start64(n)
+	barReader := bar.NewProxyReader(src)
 
-		if err != nil && err != io.EOF {
-			panic(err)
-		}
-	} else {
-		_, err = io.Copy(dst, src)
+	_, err = io.CopyN(dst, barReader, n)
 
-		if err != nil && err != io.EOF {
-			panic(err)
-		}
+	if err != nil && err != io.EOF {
+		panic(err)
 	}
 
+	bar.Finish()
+
 	return nil
+}
+
+func calcBytesToCopy(fromPath string, offset, limit int64) (int64, error) {
+	info, err := os.Stat(fromPath)
+
+	if err != nil {
+		panic(err)
+	}
+
+	if 0 == info.Size() {
+		return 0, ErrUnsupportedFile
+	}
+
+	if offset >= info.Size() {
+		return 0, ErrOffsetExceedsFileSize
+	}
+
+	n := info.Size() - offset
+
+	if limit > 0 && n > limit {
+		n = limit
+	}
+
+	return n, nil
 }
