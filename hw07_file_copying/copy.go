@@ -2,9 +2,10 @@ package main
 
 import (
 	"errors"
-	"github.com/cheggaaa/pb/v3"
 	"io"
 	"os"
+
+	"github.com/cheggaaa/pb/v3"
 )
 
 var (
@@ -58,7 +59,7 @@ func calcBytesToCopy(fromPath string, offset, limit int64) (int64, error) {
 		panic(err)
 	}
 
-	if 0 == info.Size() {
+	if info.Size() == 0 {
 		return 0, ErrUnsupportedFile
 	}
 
