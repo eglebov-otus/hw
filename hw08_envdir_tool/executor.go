@@ -33,7 +33,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 
 	cmdName = cmd[0]
 
-	//nolint
+	//nolint:gomnd
 	if len(cmd) > 1 {
 		cmdArgs = cmd[1:]
 	}
