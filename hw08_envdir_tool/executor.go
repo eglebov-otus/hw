@@ -1,7 +1,6 @@
 package main
 
 import (
-	"log"
 	"os"
 	"os/exec"
 )
@@ -21,8 +20,6 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 		}
 
 		if err != nil {
-			log.Fatalf("Failed to set env vars: %s", err)
-
 			return ReturnCodeFail
 		}
 	}
@@ -31,8 +28,6 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	var cmdArgs []string
 
 	if len(cmd) == 0 {
-		log.Fatal("Cmd should contain at least 1 argument")
-
 		return ReturnCodeFail
 	}
 
@@ -50,8 +45,6 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	c.Stderr = os.Stderr
 
 	if err := c.Run(); err != nil {
-		log.Fatalf("Failed to execute command: %s", err)
-
 		return ReturnCodeFail
 	}
 
