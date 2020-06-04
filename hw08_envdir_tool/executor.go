@@ -7,8 +7,9 @@ import (
 
 const ReturnCodeSuccess = 0
 const ReturnCodeFail = 1
+const MinCmdLen = 1
 
-// Runs a command + arguments (cmd) with environment variables from env
+// RunCmd runs a command + arguments (cmd) with environment variables from env
 func RunCmd(cmd []string, env Environment) (returnCode int) {
 	for k, v := range env {
 		var err error
@@ -33,8 +34,7 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 
 	cmdName = cmd[0]
 
-	//nolint:gomnd
-	if len(cmd) > 1 {
+	if len(cmd) > MinCmdLen {
 		cmdArgs = cmd[1:]
 	}
 
