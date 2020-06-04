@@ -24,7 +24,7 @@ func ReadDir(dir string) (Environment, error) {
 		return res, ErrInvalidDir
 	}
 
-	if len(files) < 1 {
+	if len(files) == 0 {
 		return res, ErrEmptyDir
 	}
 

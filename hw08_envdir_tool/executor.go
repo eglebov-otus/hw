@@ -6,6 +6,9 @@ import (
 	"os/exec"
 )
 
+const ReturnCodeSuccess = 0
+const ReturnCodeFail = 1
+
 // RunCmd runs a command + arguments (cmd) with environment variables from env
 func RunCmd(cmd []string, env Environment) (returnCode int) {
 	for k, v := range env {
@@ -20,12 +23,28 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 		if err != nil {
 			log.Fatalf("Failed to set env vars: %s", err)
 
-			return 1
+			return ReturnCodeFail
 		}
 	}
 
-	c := exec.Command(cmd[0], cmd[1:]...)
-	c.Env = append(os.Environ())
+	var cmdName string
+	var cmdArgs []string
+
+	if len(cmd) == 0 {
+		log.Fatal("Cmd should contain at least 1 argument")
+
+		return ReturnCodeFail
+	}
+
+	cmdName = cmd[0]
+
+	// nolint
+	if len(cmd) > 1 {
+		cmdArgs = cmd[1:]
+	}
+
+	c := exec.Command(cmdName, cmdArgs...)
+	c.Env = os.Environ()
 	c.Stdout = os.Stdout
 	c.Stdin = os.Stdout
 	c.Stderr = os.Stderr
@@ -33,8 +52,8 @@ func RunCmd(cmd []string, env Environment) (returnCode int) {
 	if err := c.Run(); err != nil {
 		log.Fatalf("Failed to execute command: %s", err)
 
-		return 1
+		return ReturnCodeFail
 	}
 
-	return 0
+	return ReturnCodeSuccess
 }
