@@ -50,30 +50,108 @@ func TestCache(t *testing.T) {
 	})
 
 	t.Run("purge logic", func(t *testing.T) {
-		// Write me
+		c := NewCache(3)
+
+		c.Set("aaa", 100)
+		c.Set("bbb", 200)
+		c.Set("ссс", 200)
+		c.Set("ddd", 555)
+
+		val, ok := c.Get("aaa")
+		require.False(t, ok)
+		require.Nil(t, val)
+
+		val, ok = c.Get("ddd")
+		require.True(t, ok)
+		require.Equal(t, 555, val)
+
+		val, ok = c.Get("bbb")
+		require.True(t, ok)
+		require.Equal(t, 200, val)
+
+		val, ok = c.Get("ссс")
+		require.True(t, ok)
+		require.Equal(t, 200, val)
+
+		c.Set("zzz", 888)
+
+		val, ok = c.Get("ddd")
+		require.False(t, ok)
+		require.Nil(t, val)
+	})
+
+	t.Run("clear logic", func(t *testing.T) {
+		c := NewCache(3)
+
+		c.Set("aaa", 100)
+		c.Set("bbb", 200)
+		c.Set("ccc", 300)
+
+		val, _ := c.Get("aaa")
+		require.Equal(t, 100, val)
+
+		val, _ = c.Get("bbb")
+		require.Equal(t, 200, val)
+
+		val, _ = c.Get("ccc")
+		require.Equal(t, 300, val)
+
+		c.Clear()
+
+		val, ok := c.Get("aaa")
+		require.Nil(t, val)
+		require.False(t, ok)
+
+		val, ok = c.Get("bbb")
+		require.Nil(t, val)
+		require.False(t, ok)
+
+		val, ok = c.Get("ccc")
+		require.Nil(t, val)
+		require.False(t, ok)
 	})
 }
 
 func TestCacheMultithreading(t *testing.T) {
-	t.Skip() // Remove if task with asterisk completed
+	t.Run("simple case", func(t *testing.T) {
+		c := NewCache(10)
+		wg := &sync.WaitGroup{}
+		wg.Add(2)
 
-	c := NewCache(10)
-	wg := &sync.WaitGroup{}
-	wg.Add(2)
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 1_000_000; i++ {
+				c.Set(Key(i), i)
+			}
+		}()
 
-	go func() {
-		defer wg.Done()
-		for i := 0; i < 1_000_000; i++ {
-			c.Set(Key(strconv.Itoa(i)), i)
-		}
-	}()
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 1_000_000; i++ {
+				c.Get(Key(strconv.Itoa(rand.Intn(1_000_000))))
+			}
+		}()
 
-	go func() {
-		defer wg.Done()
-		for i := 0; i < 1_000_000; i++ {
-			c.Get(Key(strconv.Itoa(rand.Intn(1_000_000))))
-		}
-	}()
+		wg.Wait()
+	})
 
-	wg.Wait()
+	t.Run("check clear lock", func(t *testing.T) {
+		c := NewCache(10)
+		wg := &sync.WaitGroup{}
+		wg.Add(2)
+
+		go func() {
+			defer wg.Done()
+			for i := 0; i < 1_000_000; i++ {
+				c.Set(Key(i), i)
+			}
+		}()
+
+		go func() {
+			defer wg.Done()
+			c.Clear()
+		}()
+
+		wg.Wait()
+	})
 }
