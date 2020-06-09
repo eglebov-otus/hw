@@ -1,5 +1,13 @@
 package main
 
+import "os"
+
 func main() {
-	// Place your code here
+	env, err := ReadDir(os.Args[1])
+
+	if err != nil {
+		panic(err)
+	}
+
+	os.Exit(RunCmd(os.Args[2:], env))
 }
